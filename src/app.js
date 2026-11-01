@@ -1,5 +1,4 @@
 import { createState } from './app/state.js';
-import { localeMixin } from './app/locale.js';
 import { loadingMixin } from './app/loading.js';
 import { addFilesMixin } from './app/add-files.js';
 import { derivedMixin } from './app/derived.js';
@@ -26,11 +25,6 @@ import { impactMixin } from './app/impact.js';
 const lifecycleMixin = {
   init() {
     this.$watch('currentView', (v) => {
-      // A view switch swaps a whole panel in one frame. The DOM pass normally
-      // picks that up from its mutation observer, but one explicit pass here
-      // makes the first paint of a view translated even when the observer's
-      // batch arrives later.
-      this.$nextTick(() => this.refreshCopy());
       if (v === 'graph') this.$nextTick(() => this.renderGraph());
       if (v === 'statistics') this.$nextTick(() => this.renderStatisticsCharts());
       // Learn the bundled index's build date the first time Security is shown,
@@ -48,9 +42,6 @@ const lifecycleMixin = {
     this.$watch('safetyViewMode', (mode) => {
       if (mode === 'coverage') this.$nextTick(() => this.bindCoverageScroll());
     });
-    // The landing screen and the app shell are two large branches of the same
-    // tree; replacing one with the other is a single big DOM swap.
-    this.$watch('dataLoaded', () => this.$nextTick(() => this.refreshCopy()));
     // The Supply Chain state machine is drawn with Mermaid, which is imported
     // lazily; (re)render it whenever the States angle becomes visible. The
     // render method retries until its host element is in the DOM.
@@ -97,7 +88,6 @@ const lifecycleMixin = {
 // enumerable flag so Alpine's reactivity still sees them.
 const mixins = [
   lifecycleMixin,
-  localeMixin,
   loadingMixin,
   addFilesMixin,
   derivedMixin,

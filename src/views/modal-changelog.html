@@ -45,9 +45,7 @@
             ></span>
             <span x-show="release.date" class="text-xs text-slate-500" x-text="release.date"></span>
           </div>
-          <!-- Release notes are written once, in English: leave them out of the
-           translation pass. -->
-          <ul class="space-y-1.5" data-i18n-skip>
+          <ul class="space-y-1.5">
             <template x-for="(item, i) in release.items" :key="i">
               <li
                 class="grid grid-cols-[5rem_1fr] items-baseline gap-x-2 gap-y-0.5 text-sm text-slate-300 leading-snug"
