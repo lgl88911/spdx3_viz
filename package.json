@@ -16,6 +16,8 @@
     "lint": "eslint .",
     "gen:icons": "node scripts/gen-node-icons.mjs",
     "gen:changelog": "node scripts/gen-changelog.mjs",
+    "i18n:extract": "node scripts/i18n-extract.mjs",
+    "i18n:check": "node scripts/i18n-check.mjs",
     "measure:nvd": "node --max-old-space-size=8192 scripts/measure-nvd-index.mjs",
     "measure:cve": "node --max-old-space-size=8192 scripts/measure-cve-affected-index.mjs",
     "build:cve-affected": "node --max-old-space-size=8192 scripts/build-cve-affected-index.mjs",

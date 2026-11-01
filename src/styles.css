@@ -1401,3 +1401,49 @@ body.detail-resizing {
 .source-viewer .hljs-punctuation {
   color: #adbac7;
 }
+
+/* ==========================================================================
+   Chinese UI
+   The source copy is English, so a few typographic defaults were tuned for
+   Latin script and read badly with Han glyphs: synthetic tracking on small
+   caps, negative tracking on headings, and whatever fallback font the OS
+   happens to pick. Everything here is scoped to `html:lang(zh*)`, so the
+   English UI is untouched and the two can be compared side by side.
+   ========================================================================== */
+
+html:lang(zh) {
+  /* A stack with real Han glyphs, before the Latin-first system stack. */
+  --font-sans:
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC',
+    'WenQuanYi Micro Hei', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Han glyphs are already full-width: tracking only makes the line ragged. */
+html:lang(zh) body {
+  letter-spacing: 0;
+  word-break: normal;
+  line-break: strict;
+  text-autospace: normal;
+}
+
+html:lang(zh) :where(h1, h2, h3, h4, .nav-item, .nav-profile-head, button, th, label) {
+  letter-spacing: 0;
+}
+
+/* Section labels are uppercased Latin caps in English; in Chinese only the
+   wide tracking has to go, and the case transform is a no-op. */
+html:lang(zh) .nav-section-label {
+  letter-spacing: 0.02em;
+}
+
+/* Two CJK glyphs are wider than the Latin pair they replace in a few compact
+   chips (EN/中, A+/A-). Keep those on one line. */
+html:lang(zh) :where(.nav-item, .nav-profile-head, .req-file-chip, kbd) {
+  white-space: nowrap;
+}
+
+html:lang(zh) .nav-item,
+html:lang(zh) .nav-profile-head {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

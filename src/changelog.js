@@ -11,6 +11,10 @@ export const CHANGELOG = [
     items: [
       {
         tag: 'Added',
+        text: 'Chinese UI, switchable from the header.'
+      },
+      {
+        tag: 'Added',
         text: 'Functional Safety coverage matrices, exportable to Excel.'
       },
       {

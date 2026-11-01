@@ -5,6 +5,7 @@ via the "What's new" link.
 
 ## Unreleased
 
+- **Added:** Chinese UI, switchable from the header.
 - **Added:** Functional Safety coverage matrices, exportable to Excel.
 - **Added:** Security view can scope findings to one artifact.
 - **Added:** Graph previews related nodes on hover, pans along a trail.

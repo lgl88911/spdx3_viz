@@ -5,3 +5,4 @@ coverage/
 .nvd-cache/
 public/nvd-cpe/
 public/cve-affected/
+.workbuddy/

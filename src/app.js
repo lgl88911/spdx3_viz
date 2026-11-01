@@ -1,4 +1,5 @@
 import { createState } from './app/state.js';
+import { localeMixin } from './app/locale.js';
 import { loadingMixin } from './app/loading.js';
 import { addFilesMixin } from './app/add-files.js';
 import { derivedMixin } from './app/derived.js';
@@ -88,6 +89,7 @@ const lifecycleMixin = {
 // enumerable flag so Alpine's reactivity still sees them.
 const mixins = [
   lifecycleMixin,
+  localeMixin,
   loadingMixin,
   addFilesMixin,
   derivedMixin,

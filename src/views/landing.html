@@ -1,4 +1,8 @@
 <div x-show="!dataLoaded" class="flex h-screen-dvh overflow-y-auto no-scrollbar">
+  <!-- Language switch floats here: the landing screen has no header yet. -->
+  <div class="fixed top-3 right-3 z-50">
+    <include src="partials/lang-toggle.html"></include>
+  </div>
   <div class="text-center max-w-xl mx-auto my-auto px-6 py-10">
     <div class="mb-8">
       <div

@@ -8,6 +8,7 @@ import {
 import { APP_VERSION } from '../version.js';
 import { CHANGELOG } from '../changelog.js';
 import { storedDetailPanelWidth } from './detail-panel.js';
+import { getLocale } from '../i18n/index.js';
 
 // Restores the saved NVD source preference ('live' | 'bundle'); defaults to the
 // bundled index (no rate limits or CORS, works offline).
@@ -55,6 +56,9 @@ export function createState() {
     // keeps sweeping (on the compositor) through the main thread's synchronous
     // graph/index phases instead of freezing (see _parseOnMainThread)
     currentView: 'dashboard',
+    // Active UI language ('en' | 'zh'). The DOM pass in src/i18n/dom.js reads
+    // the same module, so this mirror only exists for template reactivity.
+    locale: getLocale(),
     // Collapsible SPDX profile groups in the sidebar (profile id -> open).
     // Deep links / switchView expand the group that owns the target view.
     expandedNavProfiles: {},

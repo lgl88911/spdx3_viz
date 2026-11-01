@@ -20,5 +20,20 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm test
+npm run i18n:check
 npm run build
 ```
+
+## Copy and translations
+
+- Every user-facing string is translatable: it must render as plain text in the
+  DOM (the pass in `src/i18n/dom.js` swaps it), and its English form has to be in
+  `src/i18n/en.json` with a Chinese counterpart in `src/i18n/zh.json`.
+- After adding or changing copy, run `npm run i18n:extract`, fill the new entries
+  in `zh.json`, then `npm run i18n:check`. See `docs/i18n.md`.
+- Don't concatenate sentences from word fragments in JS: write one template
+  literal with two or more words of fixed context so the runtime can match it, or
+  call `tf()` in the template.
+- Don't hardcode a language: read `this.locale`, and repaint anything drawn on a
+  canvas in `refreshLocalizedPaint()`. Release notes stay English
+  (`data-i18n-skip`).

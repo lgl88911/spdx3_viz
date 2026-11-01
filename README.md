@@ -83,3 +83,22 @@ npm run build
 - `src/parser/`: SBOM parsing, run in a Web Worker
 - `src/graph/`: the D3 force-directed graph renderer
 - `src/lib/`: utility modules for formatting, licenses, security, and other shared logic
+- `src/i18n/`: the English and Chinese catalogs plus the runtime that swaps them in
+
+### Languages
+
+The UI ships in English and Chinese, switchable from the header (and from the
+top-right corner of the landing screen). Copy is not duplicated per template:
+`src/i18n/zh.json` maps the English string that renders to its translation, and
+the pass in `src/i18n/dom.js` swaps every visible text node, tooltip and
+placeholder, including the ones the app produces at runtime. Numbers are
+normalized first, so one entry covers every count (`"{0} files"` matches
+`"12 files"`), and entries with two or more words of context also match a
+sentence the app assembles (`"No {0} in this document"`).
+
+To translate something new, add the English string (as it renders) to
+`src/i18n/en.json` and its translation to `zh.json`. `npm run i18n:check` fails
+when the two files drift apart, when a placeholder is missing, or when an entry
+is still English. After editing the views or the JS that writes copy,
+`npm run i18n:extract` rescans the source and adds any new string with an empty
+value, keeping existing translations. See `docs/i18n.md` for the details.
