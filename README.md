@@ -6,7 +6,7 @@ builds, agents, etc. as an interactive graph.
 
 ## Features
 
-- Load SPDX 3 files from your computer, or start with one of the bundled samples.
+- Load SPDX 3 files from your computer, or start with the bundled Zephyr sample.
 - Combine several SBOM files into one model, with cross-document references resolved automatically.
 - Search across the SBOM, browse dedicated views for each kind of element, inspect the raw JSON-LD,
   or explore relationships as an interactive graph.
@@ -17,7 +17,7 @@ builds, agents, etc. as an interactive graph.
 - Plot functional-safety coverage as requirements-by-verification (and implementation, evidence,
   specification) matrices, and export them to Excel.
 - Trace requirements down to source snippets, inspect SBOM completeness statistics, and share links
-  to exact views of the bundled samples.
+  to exact views of the bundled sample.
 - Keep the SBOM itself in your browser. Files loaded from your computer are parsed locally and are
   never uploaded.
 
@@ -26,21 +26,19 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 ## Usage
 
 Open the [hosted visualizer](https://kartben.github.io/spdx3_viz/), then drop one or more `.json` or
-`.jsonld` files onto the page. You can also use the file picker or open a bundled sample. Adding
+`.jsonld` files onto the page. You can also use the file picker or open the bundled sample. Adding
 several files is useful when an SBOM is split across source, build, and output documents.
 
 Everything needed to parse and explore your SBOM runs in the browser. The app only makes external
-requests when you choose a bundled sample or when it looks up optional public metadata, such as SPDX
+requests when you choose the bundled sample or when it looks up optional public metadata, such as SPDX
 license text or a CVE record.
 
 ## Run locally
 
-Development and CI use Node.js 22. The repository also uses Git LFS for one of the larger sample
-files (why yes, the tool can ingest hundreds of megabytes worth of SBOMs just fine!), so pull the
-LFS objects after cloning if you want all bundled samples.
+Development and CI use Node.js 22. The one bundled sample (Zephyr) is checked in
+as plain files, so no Git LFS objects are needed.
 
 ```bash
-git lfs pull
 npm ci
 npm run dev
 ```
@@ -57,7 +55,7 @@ npm run preview
 
 The build is written to `dist/`. It is a static site with relative asset paths, so it can be
 published below a URL prefix or served directly with any static file server. Files under `public/`,
-including the sample SBOMs, are copied into the build unchanged.
+including the sample SBOM, are copied into the build unchanged.
 
 ## Development
 

@@ -14,6 +14,10 @@ export const CHANGELOG = [
         text: 'Chinese UI, switchable from the header.'
       },
       {
+        tag: 'Removed',
+        text: 'Bundled samples other than Zephyr.'
+      },
+      {
         tag: 'Added',
         text: 'Functional Safety coverage matrices, exportable to Excel.'
       },
@@ -26,10 +30,6 @@ export const CHANGELOG = [
         text: 'Graph previews related nodes on hover, pans along a trail.'
       },
       {
-        tag: 'Added',
-        text: 'BASIL example design SBOM sample.'
-      },
-      {
         tag: 'Improved',
         text: 'Zephyr sample carries VEX statements and fuller NTIA fields.'
       },
@@ -39,7 +39,7 @@ export const CHANGELOG = [
       },
       {
         tag: 'Fixed',
-        text: 'Graph shows `hasTestCase` edges and snippet hubs (e.g. BASIL).'
+        text: 'Graph shows `hasTestCase` edges and snippet hubs.'
       },
       {
         tag: 'Fixed',

@@ -20,9 +20,9 @@ let latestParseReqId = 0;
 let downloadAbort = null;
 let loadSession = 0;
 
-/* Every loaded file gets a process-unique id. Names collide across samples
-   (zephyr/app.jsonld vs zephyr-experimental/app.jsonld) and indexes shift as
-   files come and go, so the Files dialog identifies a loaded file by its uid. */
+/* Every loaded file gets a process-unique id. Names collide across samples (two
+   SBOMs can both ship an `app.jsonld`) and indexes shift as files come and go,
+   so the Files dialog identifies a loaded file by its uid. */
 let fileUidSeq = 0;
 
 // Stamps a freshly loaded {name, text, src?} with its uid and load time. The
@@ -304,9 +304,9 @@ export const loadingMixin = {
   },
 
   // Downloads a batch of sample files concurrently and returns them tagged, in
-  // the order given. Serial fetches cost one round trip each, which the
-  // multi-file samples (six for zephyr-experimental, three for linux) paid in
-  // full before the parse could start. Samples list a handful of files at most,
+  // the order given. Serial fetches cost one round trip each, which multi-file
+  // samples (the Zephyr one ships four documents) paid in full before the parse
+  // could start. Samples list a handful of files at most,
   // so the requests all go out at once rather than through a pool.
   //
   // `onFraction` receives the batch's overall 0..1 progress. It is summed from

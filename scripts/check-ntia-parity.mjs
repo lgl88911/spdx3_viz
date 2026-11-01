@@ -42,14 +42,12 @@ const SAMPLES_DIR = resolve(HERE, '../public/samples');
 
 // Single-document SPDX 3.0 samples the reference tool can consume directly.
 // Each `file` is relative to public/samples/.
-const PARITY_SAMPLES = [
-  { id: 'docker', file: 'docker/ubuntu-24.04-linux-amd64.spdx3.jsonld' },
-  { id: 'trivy', file: 'trivy/trivy-ubuntu-26-bom.spdx3.json' },
-  { id: 'windows', file: 'windows/windows-11.spdx3.json' },
-  { id: 'kubernetes', file: 'kubernetes/kubernetes_1_35_3_spdx.jsonld' },
-  { id: 'vuejs', file: 'vuejs/vuej-demo-sbom.spdx3.jsonld' },
-  { id: 'ai', file: 'ai/simplehtr-example.spdx3.json' }
-];
+//
+// Empty on purpose: the only bundled sample left is Zephyr, which is a
+// multi-document build split across four files, and the reference tool reads a
+// single document. Add an entry here (and to public/samples/samples.json) if a
+// single-document sample comes back.
+const PARITY_SAMPLES = [];
 
 // Elements this app scores differently from the reference tool, and why. These
 // are reported but never gated: the app's definition is intentionally the more
@@ -197,6 +195,10 @@ function main() {
   }
 
   console.log(`\n${compared} sample(s) compared, ${failed} with aligned mismatches.`);
+  if (!PARITY_SAMPLES.length) {
+    console.log('No single-document sample is bundled, so there is nothing to compare.');
+    return;
+  }
   if (compared === 0) {
     console.error('No reference JSON found: did the reference tool run?');
     process.exit(1);

@@ -108,9 +108,9 @@ test('buildRelationshipIndexes indexes SPDX build relationships and unresolved e
 });
 
 test('parseGraph categorizes SPDX 3.1 SupplyChain actions, processes, and states', () => {
-  const graph = JSON.parse(
-    readFileSync('public/samples/supply-chain/arborlink-sg1-supply-chain.spdx3.jsonld', 'utf8')
-  )['@graph'];
+  const graph = JSON.parse(readFileSync('tests/fixtures/supply-chain.spdx3.jsonld', 'utf8'))[
+    '@graph'
+  ];
   const parsed = parseGraph(graph);
   const indexes = buildRelationshipIndexes(parsed.relationships);
 
@@ -135,9 +135,9 @@ test('parseGraph categorizes SPDX 3.1 SupplyChain actions, processes, and states
 });
 
 test('SupplyChain sample embeds LicenseRef-Arbor-Proprietary text', async () => {
-  const graph = JSON.parse(
-    readFileSync('public/samples/supply-chain/arborlink-sg1-supply-chain.spdx3.jsonld', 'utf8')
-  )['@graph'];
+  const graph = JSON.parse(readFileSync('tests/fixtures/supply-chain.spdx3.jsonld', 'utf8'))[
+    '@graph'
+  ];
   const parsed = parseGraph(graph);
   const indexes = buildRelationshipIndexes(parsed.relationships);
   const app = spdxApp();
@@ -172,9 +172,9 @@ test('SupplyChain sample embeds LicenseRef-Arbor-Proprietary text', async () => 
 });
 
 test('SupplyChain view model exposes lifecycle, custody, and exception structures', () => {
-  const graph = JSON.parse(
-    readFileSync('public/samples/supply-chain/arborlink-sg1-supply-chain.spdx3.jsonld', 'utf8')
-  )['@graph'];
+  const graph = JSON.parse(readFileSync('tests/fixtures/supply-chain.spdx3.jsonld', 'utf8'))[
+    '@graph'
+  ];
   const parsed = parseGraph(graph);
   const indexes = buildRelationshipIndexes(parsed.relationships);
   const app = spdxApp();
