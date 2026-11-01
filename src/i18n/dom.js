@@ -21,7 +21,9 @@ import { getLocale, setLocale, t } from './index.js';
 const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'KBD', 'SAMP', 'TEXTAREA']);
 
 // Attributes whose value is read by users (tooltips, a11y labels, placeholders).
-const TRANSLATED_ATTRS = ['title', 'placeholder', 'aria-label', 'alt'];
+// `data-tip` is the app's instant tooltip: `.g-tip::after { content: attr(data-tip) }`,
+// so the bubble is painted from the attribute and never reaches a text node.
+const TRANSLATED_ATTRS = ['title', 'placeholder', 'aria-label', 'alt', 'data-tip'];
 
 /** node -> { src, out }: the English the app wants, and what we last wrote. */
 const textRecords = new WeakMap();
@@ -149,16 +151,18 @@ function applyDocumentTitle() {
 /** Runs a full pass now (frame-batched version used by the observer). */
 export function refreshDom() {
   if (typeof document === 'undefined' || !document.body) return;
-  observer?.disconnect();
+  // Anything already queued is a change we have not looked at yet, so another
+  // pass is owed after this one. `takeRecords()` is used instead of
+  // `disconnect()` on purpose: disconnecting empties the queue, which silently
+  // dropped whatever the app had rendered between scheduling and this frame —
+  // a whole view swap could stay in English that way.
+  const pending = observer ? observer.takeRecords() : [];
   translateTree(document.body);
   applyDocumentTitle();
-  observer?.observe(document.body, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: TRANSLATED_ATTRS
-  });
+  // Drop the records our own writes just queued, so the observer does not chase
+  // itself. Foreign records stay queued by their own mutations.
+  observer?.takeRecords();
+  if (pending.length) scheduleRefresh();
 }
 
 function scheduleRefresh() {
@@ -180,6 +184,13 @@ export function startDomTranslation() {
   if (started || typeof document === 'undefined' || !document.body) return;
   started = true;
   observer = new MutationObserver(scheduleRefresh);
+  observer.observe(document.body, {
+    subtree: true,
+    childList: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: TRANSLATED_ATTRS
+  });
   refreshDom();
 }
 

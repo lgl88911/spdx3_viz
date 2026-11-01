@@ -93,7 +93,11 @@ test('every key has a translation or is an obvious proper noun', () => {
     if (value !== key) continue;
     // Untouched entries must have nothing to translate: a name, an acronym, a
     // licence id, a format token, or a label made only of symbols and slots.
-    const words = key.replace(/\{\d+\}/g, ' ').match(/[A-Za-z]{3,}/g) || [];
+    // All-caps words are acronyms (CVSS, SPDX, SBOM) and stay as they are even
+    // when the entry also carries a slot, as in "{0} · CVSS v".
+    const words = (key.replace(/\{\d+\}/g, ' ').match(/[A-Za-z]{3,}/g) || []).filter(
+      (word) => !/^[A-Z0-9]+$/.test(word)
+    );
     if (!words.length) continue;
     assert.match(key, /^[\p{L}\p{N} .&+/-]+$/u, `untranslated copy: ${key}`);
   }

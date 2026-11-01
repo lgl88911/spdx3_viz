@@ -19,6 +19,8 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, resolve, relative } from 'node:path';
 
+import { createGraphFilters, RELATIONSHIP_LABELS } from '../src/config.js';
+
 const ROOT = resolve(import.meta.dirname, '..');
 const VIEWS_DIR = join(ROOT, 'src/views');
 const EN_FILE = join(ROOT, 'src/i18n/en.json');
@@ -257,7 +259,7 @@ function scanHtml(file, keys) {
   }
 
   // 2. User-facing attributes.
-  const attrRe = /\b(title|placeholder|aria-label|alt)="([^"]+)"/g;
+  const attrRe = /(?<![:\w-])(title|placeholder|aria-label|alt|data-tip)="([^"]+)"/g;
   while ((m = attrRe.exec(sanitized))) {
     const value = clean(m[2]);
     if (!/[A-Za-z]/.test(value) || value.includes('${')) continue;
@@ -269,7 +271,8 @@ function scanHtml(file, keys) {
   //    assembled as `something + ' files'`.
   // `x-data` / `x-for` only contribute the property values handled below: their
   // literals are object keys and enum values, not copy.
-  const exprRe = /\b(x-text|x-html|:title|:aria-label|:placeholder|x-init|x-data|x-for)="([^"]*)"/g;
+  const exprRe =
+    /(?<![:\w-])(x-text|x-html|x-init|x-data|x-for|:title|:aria-label|:placeholder|:data-tip)="([^"]*)"/g;
   while ((m = exprRe.exec(sanitized))) {
     const expr = m[2];
     const isBinding = !m[1].startsWith('x-data') && !m[1].startsWith('x-for');
@@ -406,6 +409,7 @@ function readJson(file, fallback) {
  */
 const EXTRA_KEYS = [
   '× {0}',
+  '+{0} more',
   '· {0} new',
   '{0} affected items',
   'Grade {0}',
@@ -428,12 +432,50 @@ const EXTRA_KEYS = [
   'high+',
   // Sentence tails glued to a formatted date inside an inline span.
   ', index last updated {0}',
-  ', updated {0}'
+  ', updated {0}',
+  // Tooltips built with a template literal in a `:title` binding, which the
+  // expression scanner cannot see.
+  'Hide {0}',
+  'Show {0}',
+  'Hide {0} edges',
+  'Show {0} edges',
+  // Tooltip sentences assembled by `'…' + value` concatenation in a binding.
+  // The scanner sees the pieces, not the sentence, so the pattern that the
+  // rendered attribute actually matches is spelled out here.
+  'Open {0} in this SBOM',
+  'Open {0} in Packages',
+  'Lifecycle scope: {0}',
+  'Entered state: {0}',
+  'CISA definition: {0}',
+  'View license · {0}',
+  'Declared: {0}',
+  'Concluded: {0}',
+  'Outbound {0} accepting inbound {1}: {2}',
+  'Depends on {0} package(s) (SPDX dependsOn)',
+  'Consumed as input by {0} build(s) (SPDX hasInput)',
+  'Produced by {0} build(s) (SPDX hasOutput)'
 ];
+
+/**
+ * Relationship vocabulary, taken from the source of truth rather than copied by
+ * hand: the graph legend labels each edge with the raw SPDX type id
+ * (`dependsOn`), and the detail panel names the same edge with a
+ * direction-aware phrase (`Depends on`). The scanner skips bare single words
+ * and camelCase ids, so both sets are read straight from `config.js`.
+ * @returns {string[]}
+ */
+function relationshipKeys() {
+  return [
+    ...createGraphFilters()
+      .filter((f) => f.isRel)
+      .map((f) => f.label),
+    ...Object.values(RELATIONSHIP_LABELS)
+  ];
+}
 
 function main() {
   const keys = new Map();
-  for (const key of EXTRA_KEYS) keys.set(key, 'manual');
+  for (const key of [...EXTRA_KEYS, ...relationshipKeys()]) keys.set(key, 'manual');
   for (const file of collectHtml()) scanHtml(file, keys);
   for (const file of collectJs()) scanJs(file, keys);
 

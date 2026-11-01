@@ -35,6 +35,8 @@ const STORAGE_KEY = 'spdx3viz.locale';
 // placeholder so `"1,234 packages"` and `"7 packages"` share one catalog entry.
 const NUMBER_RE = /\d[\d.,]*/g;
 const PLACEHOLDER = '\u0000';
+/** A catalog placeholder: `{0}`, `{1}`, … */
+const SLOT = /\{(\d+)\}/g;
 
 let current = FALLBACK_LOCALE;
 /** exact source string -> translation */
@@ -48,17 +50,19 @@ const resolved = new Map();
 const listeners = new Set();
 
 /** Replaces digit runs with a placeholder, returning the normalized text and
- * the captured groups in order. */
+ * the captured groups in order.
+ *
+ * A catalog slot is a placeholder too: `"{0} files"` has to normalize to the
+ * same thing as the rendered `"12 files"`, otherwise the count lookup can never
+ * hit and every count falls through to the looser sentence matcher. */
 function normalize(text) {
   const groups = [];
-  const normalized = text.replace(NUMBER_RE, (m) => {
+  const normalized = text.replace(SLOT, PLACEHOLDER).replace(NUMBER_RE, (m) => {
     groups.push(m);
     return PLACEHOLDER;
   });
   return { normalized, groups };
 }
-
-const SLOT = /\{(\d+)\}/g;
 
 /** Escapes a literal chunk for use inside a RegExp. */
 function escapeRe(text) {
@@ -71,9 +75,16 @@ function escapeRe(text) {
  * A key with placeholders and real words around them (`"No {0} in this
  * document"`) matches the same sentence with any subject, which is how copy the
  * app assembles at runtime (`"No AI models in this document"`) finds its
- * translation without a `tf()` call at every site. Keys that are only a count
- * and a unit (`"{0} files"`) stay out: their slot must be a number, and the
- * number pass already covers them.
+ * translation without a `tf()` call at every site.
+ *
+ * A key needs at least one word of literal context, and a key with a single
+ * slot has to earn a wide slot: `"{0} edges"` matches one token only, because a
+ * `\S.{0,60}?` slot happily swallowed `"3 nodes · 12 edges"` and produced a
+ * half-translated line. Two narrow shapes are allowed with one word of context
+ * or none: a short symbol-led label (`"× {0}"`, `"{0} edges"`) and a short
+ * capitalised prefix (`"Grade {0}"`). Keys with two or more slots
+ * (`"{0}: {1} edges ({2})"`) keep wide slots: the surrounding literals are
+ * specific enough, and each captured slot is translated on its own.
  * @param {string} key
  * @returns {RegExp|null}
  */
@@ -82,13 +93,18 @@ function templateRe(key) {
     .replace(SLOT, ' ')
     .split(/\s+/)
     .filter((w) => /[A-Za-z]{3,}/.test(w));
-  // Two words of context is the safe bar. Two narrow exceptions: a symbol-led
-  // label ("× {0}") whose slot holds a single word, and a short capitalised
-  // prefix ("Grade {0}"), where the slot is a grade or a name.
   const slots = (key.match(SLOT) || []).length;
-  const narrow = slots === 1 && key.length <= 16 && /^[A-Z×·]/.test(key);
-  if (words.length < 2 && !/^[^\w\s]/.test(key) && !narrow) return null;
-  const parts = key.split(SLOT).map((part, i) => (i % 2 ? '(\\S.{0,60}?)' : escapeRe(part)));
+  const symbolLed = slots === 1 && key.length <= 24 && /^[^\w\s]/.test(key);
+  const capitalLed = slots === 1 && key.length <= 16 && /^[A-Z]/.test(key);
+  let slot;
+  if (slots === 1) {
+    if (words.length < 2 && !symbolLed && !capitalLed) return null;
+    slot = words.length < 2 ? '(\\S+)' : '(\\S.{0,60}?)';
+  } else {
+    if (!words.length) return null;
+    slot = '(\\S.{0,60}?)';
+  }
+  const parts = key.split(SLOT).map((part, i) => (i % 2 ? slot : escapeRe(part)));
   return new RegExp(`^${parts.join('')}$`);
 }
 
@@ -105,8 +121,11 @@ function indexCatalog(catalog) {
     const { normalized } = normalize(key);
     if (!patterns.has(normalized)) patterns.set(normalized, value);
     const re = templateRe(key);
-    if (re) templates.push({ re, value });
+    // Longest literal context first, so "No {0} in this document" is tried
+    // before a shorter entry that could also span the same sentence.
+    if (re) templates.push({ re, value, context: key.replace(SLOT, '').length });
   }
+  templates.sort((a, b) => b.context - a.context);
   return { exact, patterns, templates };
 }
 

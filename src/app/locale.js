@@ -10,7 +10,7 @@
  */
 
 import { LOCALES, LOCALE_LABELS, getLocale, t, tf } from '../i18n/index.js';
-import { applyLocale } from '../i18n/dom.js';
+import { applyLocale, refreshDom } from '../i18n/dom.js';
 
 export const localeMixin = {
   /** Locale codes in menu order, and their labels (EN / 中文). */
@@ -21,6 +21,21 @@ export const localeMixin = {
   /** True when the UI is not in its source language. */
   get isTranslated() {
     return this.locale !== 'en';
+  },
+
+  /**
+   * Re-runs the DOM pass over the whole page. The mutation observer covers most
+   * updates on its own; this is for the ones that replace a whole panel in a
+   * single frame (a view switch, the landing screen giving way to the app), where
+   * waiting for the next batch would show a flash of English.
+   *
+   * The second pass on the next macrotask is deliberate: `x-if` inserts its
+   * cloned subtree after the watcher that flipped the flag has run, so a pass in
+   * the same tick can still be looking at the old tree.
+   */
+  refreshCopy() {
+    refreshDom();
+    setTimeout(refreshDom, 0);
   },
 
   /**
